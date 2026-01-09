@@ -1,0 +1,87 @@
+:root {
+  --primary: #fa9a21;
+  --primary-hover: #f08c10;
+  --primary-bg: rgba(250, 154, 33, 0.1);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --bg-light: #f8fafc;
+  --radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg-light);
+  font-size: 13px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.login-logo {
+  max-width: 120px;
+}
+
+.login-form input {
+  padding: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--white);
+
+  font-size: 13px;
+}
+
+.primary-button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.primary-button:hover {
+  background: var(--primary-hover);
+}
+
+.sidebar-brand {
+    display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  padding: 0rem;
+  text-align: left;
+}
+
+.sidebar-logo {
+  height: 35px;
+  margin-bottom: 0.5rem;
+  object-fit: contain;
+}
+
+.sidebar-brand h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--primary);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1rem;
+}
