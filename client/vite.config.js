@@ -1,12 +1,19 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// FRONTEND PROXY SETUP TO BACKEND
 export default defineConfig({
   plugins: [react()],
+  base: '/', 
+  build: {
+    outDir: 'dist', 
+  },
   server: {
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      }
     }
   }
 })

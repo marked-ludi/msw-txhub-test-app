@@ -7,8 +7,11 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
+
+const DIST_PATH = path.resolve(__dirname, 'dist');
 
 // JWT MIDDLEWARE
 const authenticateToken = (req, res, next) => {
@@ -45,7 +48,7 @@ app.post('/api/login', async (req, res) => {
             const token = jwt.sign({ id: users[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
             res.json({ token });
         } else {
-            res.send('Not Allowed');
+            res.status(401).send('Not Allowed');
         }
     } catch (err) {
         res.status(500).send(err.message);
@@ -53,30 +56,43 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.get('/api/tasks', authenticateToken, async (req, res) => {
-    const [tasks] = await db.query('SELECT * FROM tasks WHERE user_id = ?', [req.user.id]);
-    res.json(tasks);
+    try {
+        const [tasks] = await db.query('SELECT * FROM tasks WHERE user_id = ?', [req.user.id]);
+        res.json(tasks);
+    } catch (err) {
+        res.sendStatus(500);
+    }
 });
 
 app.post('/api/tasks', authenticateToken, async (req, res) => {
-    await db.query('INSERT INTO tasks (description, user_id) VALUES (?, ?)', [req.body.description, req.user.id]);
-    res.sendStatus(201);
+    try {
+        await db.query('INSERT INTO tasks (description, user_id) VALUES (?, ?)', [req.body.description, req.user.id]);
+        res.sendStatus(201);
+    } catch (err) {
+        res.sendStatus(500);
+    }
 });
 
 app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
-    await db.query('DELETE FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-    res.sendStatus(200);
+    try {
+        await db.query('DELETE FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+        res.sendStatus(200);
+    } catch (err) {
+        res.sendStatus(500);
+    }
 });
 
-// SERVE STATIC REACT FILES
-app.use(express.static(path.join(__dirname, 'dist')));
+// SERVE STATIC FILES
+console.log('Serving static files from:', DIST_PATH);
+app.use('/assets', express.static(path.join(DIST_PATH, 'assets')));
+app.use(express.static(DIST_PATH));
 
-app.use((req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+// CATCH-ALL HANDLER
+app.get('*', (req, res) => {
+    res.sendFile(path.join(DIST_PATH, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Success! Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
-
-
