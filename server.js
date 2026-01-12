@@ -87,11 +87,9 @@ console.log('Serving static files from:', DIST_PATH);
 app.use('/assets', express.static(path.join(DIST_PATH, 'assets')));
 app.use(express.static(DIST_PATH));
 
-// CATCH-ALL HANDLER
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(DIST_PATH, 'index.html'));
 });
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
