@@ -13,7 +13,6 @@ app.use(cors());
 
 const DIST_PATH = path.resolve(__dirname, 'dist');
 
-// JWT MIDDLEWARE
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -26,16 +25,13 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// ROUTES
 app.post('/api/register', async (req, res) => {
     try {
         const { username, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
         res.status(201).send('User Registered');
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
+    } catch (err) { res.status(500).send(err.message); }
 });
 
 app.post('/api/login', async (req, res) => {
@@ -43,53 +39,42 @@ app.post('/api/login', async (req, res) => {
         const { username, password } = req.body;
         const [users] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
         if (users.length === 0) return res.status(400).send('User not found');
-
         if (await bcrypt.compare(password, users[0].password)) {
             const token = jwt.sign({ id: users[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
             res.json({ token });
-        } else {
-            res.status(401).send('Not Allowed');
-        }
-    } catch (err) {
-        res.status(500).send(err.message);
-    }
+        } else { res.status(401).send('Not Allowed'); }
+    } catch (err) { res.status(500).send(err.message); }
 });
 
 app.get('/api/tasks', authenticateToken, async (req, res) => {
     try {
         const [tasks] = await db.query('SELECT * FROM tasks WHERE user_id = ?', [req.user.id]);
         res.json(tasks);
-    } catch (err) {
-        res.sendStatus(500);
-    }
+    } catch (err) { res.sendStatus(500); }
 });
 
 app.post('/api/tasks', authenticateToken, async (req, res) => {
     try {
         await db.query('INSERT INTO tasks (description, user_id) VALUES (?, ?)', [req.body.description, req.user.id]);
         res.sendStatus(201);
-    } catch (err) {
-        res.sendStatus(500);
-    }
+    } catch (err) { res.sendStatus(500); }
 });
 
 app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
     try {
         await db.query('DELETE FROM tasks WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
         res.sendStatus(200);
-    } catch (err) {
-        res.sendStatus(500);
-    }
+    } catch (err) { res.sendStatus(500); }
 });
 
-// SERVE STATIC FILES
-console.log('Serving static files from:', DIST_PATH);
 app.use('/assets', express.static(path.join(DIST_PATH, 'assets')));
+
 app.use(express.static(DIST_PATH));
 
 app.get(/.*/, (req, res) => {
     res.sendFile(path.join(DIST_PATH, 'index.html'));
 });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

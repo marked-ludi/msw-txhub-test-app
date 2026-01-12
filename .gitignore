@@ -1,9 +1,4 @@
-# DEPENDENCIES
 node_modules/
 client/node_modules/
-
-# ENVS
 .env
-
-# MISC
 .DS_Store
